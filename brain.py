@@ -6,16 +6,15 @@ import random
 import pisqpipe as pp
 from pisqpipe import DEBUG_EVAL, DEBUG
 from itertools import product
-from minmax import constructTree
 import numpy as np
-import minmax
+import copy
 
 pp.infotext = 'name="pbrain-minmax", version="1.0"'
 
 MAX_BOARD = 100
 board = [[0 for i in range(MAX_BOARD)] for j in range(MAX_BOARD)]
 
-DEBUG_LOGFILE = "D:/pbrain-minmax-log.txt"
+DEBUG_LOGFILE = "E:/FOR COURSES/大三/人工智能/PJ/pj final/pbrain-minmax/pbrain-minmax.log"
 
 # ...and clear it initially
 with open(DEBUG_LOGFILE, "w") as f:
@@ -35,7 +34,7 @@ def logTraceBack():
 	with open(DEBUG_LOGFILE,"a") as f:
 		traceback.print_exc(file=f)
 		f.flush()
-	raise
+	raise 
 
 def brain_init():
 	if pp.width < 5 or pp.height < 5:
@@ -89,7 +88,7 @@ def brain_turn():
 		logDebug("Calling brain turn")
 		root = constructTree(board, player=1, nodePosition=None)
 		logDebug("Constructed a Minmax Tree")
-		val = minmax.value(root, -float('inf'), float('inf'))
+		val = value(root, -float('inf'), float('inf'))
 		logDebug("Calculated a Minmax Value")
 		nextPosition = None
 		for succ in root.successor:
@@ -245,6 +244,72 @@ if DEBUG_EVAL:
 		c = str(board[x][y])
 		win32gui.ExtTextOut(dc, rc[2]-15, 3, 0, None, c, ())
 		win32gui.ReleaseDC(wnd, dc)
+class Node:
+    def __init__(self, player = 1, successor = [], isLeaf = False, value = None, position:tuple = None):
+        if player == 1:
+            self.rule = 'max'
+        else:
+            self.rule = 'min'
+        self.successor = successor
+        self.isLeaf = isLeaf
+        self.value = value
+        self.position = position 
+
+def value(node, alpha, beta):
+    if node.rule == 'max':
+        return maxValue(node, alpha, beta)
+    else:
+        return minValue(node, alpha, beta)
+
+
+def maxValue(node, alpha, beta):
+    if node.isLeaf:
+        return node.value
+    val = float("-inf")
+    for action in node.successor:
+        action.visited = True
+        val = max(val, minValue(action, alpha, beta))
+        if val >= beta:
+            return val
+        alpha = max(alpha, val)
+    return val
+
+
+def minValue(node, alpha, beta):
+    if node.isLeaf:
+        return node.value
+    val = float("inf")
+    for action in node.successor:
+        action.visited = True
+        val = min(val, maxValue(action, alpha, beta))
+        if val <= alpha:
+            return val
+        beta = min(beta, val)
+    return val
+
+
+def constructTree(board, player, nodePosition):
+    '''
+    construct a tree using given information, and return the root node
+    :param n:  the height of tree
+    :param board: the input board described with list nested structure
+    :param player: root node's type, 1 for max, 2 for min
+    :return: root node
+    '''
+    node = Node(player=player)
+    successors = []
+    neighbors = findNeighbor(board)
+    node.position = nodePosition
+    for neighbor in neighbors:
+        newboard = copy.deepcopy(board)
+        position = (neighbor[0], neighbor[1])
+        newboard[neighbor[0], neighbor[1]] = player
+        if  score(newboard) > 5000:
+            successors.append(Node(player=3-player, isLeaf=True, value=score(newboard), position=position))
+        else:
+            successors.append(constructTree(newboard, 3-player, nodePosition=position))
+    node.successor = successors
+    return node
 
 # "overwrites" functions in pisqpipe module
 pp.brain_init = brain_init
