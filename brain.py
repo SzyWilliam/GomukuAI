@@ -14,7 +14,7 @@ pp.infotext = 'name="pbrain-minmax", version="1.0"'
 MAX_BOARD = 100
 board = [[0 for i in range(MAX_BOARD)] for j in range(MAX_BOARD)]
 
-DEBUG_LOGFILE = "E:/FOR COURSES/大三/人工智能/PJ/pj final/pbrain-minmax/pbrain-minmax.log"
+DEBUG_LOGFILE = "E:/FOR COURSES/大三/人工智能/PJ/pj final/pbrain-minmax/GomukuAI/pbrain-minmax.log"
 
 # ...and clear it initially
 with open(DEBUG_LOGFILE, "w") as f:
@@ -142,20 +142,20 @@ def patternCount(board):
 		TWOa: 2 stones in a line with both ends open 						 **
 	:returns a dict: {patternstr:(player1_count,player2_count)}
 	"""	
-	patternDict = {'11111':(0,0),
-				 '011110':(0,0),
-				 '011112':(0,0),
-				 '211110':(0,0),
-				 '0111010':(0,0),
-				 '0101110':(0,0),
-				 '0110110':(0,0),
-				 '01110':(0,0),
-				 '01112':(0,0),
-				 '21110':(0,0),
-				 '011010':(0,0),
-				 '010110':(0,0),
-				 '0220':(0,0),
-				 'double3':(0,0)}
+	patternDict = {'11111':[0,0],
+				 '011110':[0,0],
+				 '011112':[0,0],
+				 '211110':[0,0],
+				 '0111010':[0,0],
+				 '0101110':[0,0],
+				 '0110110':[0,0],
+				 '01110':[0,0],
+				 '01112':[0,0],
+				 '21110':[0,0],
+				 '011010':[0,0],
+				 '010110':[0,0],
+				 '0220':[0,0],
+				 'double3':[0,0]}
 
 	# Extend the board by filling in the walls with 0;
 	# Construct 2 extended boards for two players (save time for string match)
@@ -303,7 +303,7 @@ def constructTree(board, player, nodePosition):
     for neighbor in neighbors:
         newboard = copy.deepcopy(board)
         position = (neighbor[0], neighbor[1])
-        newboard[neighbor[0], neighbor[1]] = player
+        newboard[neighbor[0]][neighbor[1]] = player
         if  score(newboard) > 5000:
             successors.append(Node(player=3-player, isLeaf=True, value=score(newboard), position=position))
         else:
