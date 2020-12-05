@@ -8,12 +8,34 @@ from pisqpipe import DEBUG_EVAL, DEBUG
 from itertools import product
 from minmax import constructTree
 import numpy as np
+import minmax
 
 pp.infotext = 'name="pbrain-minmax", version="1.0"'
 
 MAX_BOARD = 100
 board = [[0 for i in range(MAX_BOARD)] for j in range(MAX_BOARD)]
 
+DEBUG_LOGFILE = "D:/pbrain-minmax-log.txt"
+
+# ...and clear it initially
+with open(DEBUG_LOGFILE, "w") as f:
+	pass
+
+
+# define a function for writing messages to the file
+def logDebug(msg):
+	with open(DEBUG_LOGFILE,"a") as f:
+		f.write(msg+"\n")
+		f.flush()
+
+
+# define a function to get exception traceback
+def logTraceBack():
+	import traceback
+	with open(DEBUG_LOGFILE,"a") as f:
+		traceback.print_exc(file=f)
+		f.flush()
+	raise
 
 def brain_init():
 	if pp.width < 5 or pp.height < 5:
@@ -58,21 +80,26 @@ def brain_takeback(x, y):
 	return 2
 
 def brain_turn():
-	# 待改
-	if pp.terminateAI:
-		return
-	i = 0
-	while True:
-		x = random.randint(0, pp.width)
-		y = random.randint(0, pp.height)
-		i += 1
+	global board
+	try:
+		# 待改
 		if pp.terminateAI:
 			return
-		if isFree(x,y):
-			break
-	if i > 1:
-		pp.pipeOut("DEBUG {} coordinates didn't hit an empty field".format(i))
-	pp.do_mymove(x, y)
+
+		logDebug("Calling brain turn")
+		root = constructTree(board, player=1, nodePosition=None)
+		logDebug("Constructed a Minmax Tree")
+		val = minmax.value(root, -float('inf'), float('inf'))
+		logDebug("Calculated a Minmax Value")
+		nextPosition = None
+		for succ in root.successor:
+			if succ.value == val:
+				nextPosition = succ.position
+
+		pp.do_mymove(nextPosition[0], nextPosition[1])
+	except:
+		logTraceBack()
+
 
 def brain_end():
 	pass
@@ -162,17 +189,17 @@ def patternCount(board):
 		
 	# Count by diagonal
 	for i in range(len(boardExtend1)):
-    	line = ''
-    	for j in range(1-i):
-    		line = line + str(boardExtend1[i][j])
+		line = ''
+		for j in range(1-i):
+			line = line + str(boardExtend1[i][j])
 		for pattern in patternDict.keys():
-    		patternDict[pattern][0] += line.count(pattern)
+			patternDict[pattern][0] += line.count(pattern)
 	for i in range(len(boardExtend2)):
-    	line = ''
-    	for j in range(1-i):
-    		line = line + str(boardExtend2[i][j])
+		line = ''
+		for j in range(1-i):
+			line = line + str(boardExtend2[i][j])
 		for pattern in patternDict.keys():
-    		patternDict[pattern][1] += line.count(pattern)	
+			patternDict[pattern][1] += line.count(pattern)
 
 	# Count double3
 	# 待补
@@ -205,7 +232,8 @@ def score(board):
 		score += (patternDict[pattern][0]-patternDict[pattern][1]) * scoreDict[pattern]
 	return score
 
-						
+
+
 
 if DEBUG_EVAL:
 	import win32gui

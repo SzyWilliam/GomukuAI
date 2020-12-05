@@ -6,7 +6,7 @@ from brain import getStones,findNeighbor,score
 import copy
 
 class Node:
-    def __init__(self, player = 1, successor = [], isLeaf = False, value = None,position = None):
+    def __init__(self, player = 1, successor = [], isLeaf = False, value = None, position:tuple = None):
         if player == 1:
             self.rule = 'max'
         else:
@@ -49,7 +49,7 @@ def minValue(node, alpha, beta):
     return val
 
 
-def constructTree(board, player):
+def constructTree(board, player, nodePosition):
     '''
     construct a tree using given information, and return the root node
     :param n:  the height of tree
@@ -60,12 +60,14 @@ def constructTree(board, player):
     node = Node(player=player)
     successors = []
     neighbors = findNeighbor(board)
+    node.position = nodePosition
     for neighbor in neighbors:
         newboard = copy.deepcopy(board)
-        newboard[neighbor[0],neighbor[1]] = player
+        position = (neighbor[0], neighbor[1])
+        newboard[position] = player
         if  score(newboard) == 5000:
-            successors.append(Node(player=3-player, isLeaf=True, value=5000))
+            successors.append(Node(player=3-player, isLeaf=True, value=5000, position=position))
         else:
-            successors.append(constructTree(newboard, 3-player))
+            successors.append(constructTree(newboard, 3-player, nodePosition=position))
     node.successor = successors
     return node
