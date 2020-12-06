@@ -46,11 +46,8 @@ class PatternExtractionScorer(Scorer):
                        '21110': [0, 0],
                        '011010': [0, 0],
                        '010110': [0, 0],
-                       '0220': [0, 0],
-                       '0110': [0, 0],  # Add three new patterns for a quick start
-                       '020': [0, 0],
-                       '010': [0, 0],
-                       'double3': [0, 0]}
+                       '0110': [0, 0], 
+                       '010': [0, 0]}
 
         # Extend the board by filling in the walls with 0;
         # Construct 2 extended boards for two players (save time for string match)
@@ -99,24 +96,21 @@ class PatternExtractionScorer(Scorer):
         score = 0
         scoreDict = {'11111': 5000,
                      '011110': 5000,
-                     '011112': 10,
-                     '211110': 10,
-                     '0111010': 12,
-                     '0101110': 12,
-                     '0110110': 12,
-                     '01110': 8,
-                     '01112': 6,
-                     '21110': 6,
-                     '011010': 4,
-                     '010110': 4,
-                     '0220': 2,
-                     '0110': 2,
-                     '020': 1,
-                     '010': 1,
-                     'double3': 20}
+                     '011112': 100,
+                     '211110': 100,
+                     '0111010': 300,
+                     '0101110': 300,
+                     '0110110': 300,
+                     '01110': 300,
+                     '01112': 50,
+                     '21110': 50,
+                     '011010': 100,
+                     '010110': 100,
+                     '0110': 10,
+                     '010': 1}
         patternDict = PatternExtractionScorer.patternCount(board)
         for pattern in patternDict.keys():
-            score += (patternDict[pattern][0] - patternDict[pattern][1]) * scoreDict[pattern]
+            score += (patternDict[pattern][0] - 5*patternDict[pattern][1]) * scoreDict[pattern]
         return score
 
 
