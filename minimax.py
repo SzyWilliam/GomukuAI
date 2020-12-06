@@ -1,6 +1,8 @@
 from itertools import product
 import copy
 from board_scorer import Scorer
+import random
+from brain import logDebug
 
 
 class Node:
@@ -51,14 +53,9 @@ class GomukuMinmaxTree:
         :return: a tuple, first element is the max value calculated for current board
             second element is the position of the best move
         """
-        root_value = self.value(self.root, -float('inf'), float('inf'))
-        nextPosition = None
-        for succ in self.root.successor:
-            if succ.value == root_value:
-                nextPosition = succ.position
-                break
-        return root_value, nextPosition
+        return self.value(self.root, -float('inf'), float('inf'))
 
+    # TODO Is The value really propagating up to parent nodes?
     def value(self, node, alpha, beta):
         if node.rule == 'max':
             return self.maxValue(node, alpha, beta)
@@ -67,40 +64,52 @@ class GomukuMinmaxTree:
 
     def maxValue(self, node, alpha, beta):
         if node.isLeaf:
-            return node.value
+            return node.value, node.position
         val = float("-inf")
-        for action in node.successor:
-            action.visited = True
-            val = max(val, self.minValue(action, alpha, beta))
-            if val >= beta:
-                node.value = val  # Propagation
+        position = None
+        for child in node.successor:
+            child.visited = True
+            childVal = self.minValue(child, alpha, beta)[0]
+            if childVal > val:
+                val = childVal
+                position = child.position
+            if val >= beta:  # Pruning
+                return val, None
             alpha = max(alpha, val)
-        return val
+        return val, position
 
     def minValue(self, node, alpha, beta):
         if node.isLeaf:
-            return node.value
+            return node.value, node.position
         val = float("inf")
-        for action in node.successor:
-            action.visited = True
-            val = min(val, self.maxValue(action, alpha, beta))
-            if val <= alpha:
-                node.value = val
+        position = None
+        for child in node.successor:
+            child.visited = True
+            childVal = self.maxValue(child, alpha, beta)[0]
+
+            if childVal < val:
+                position = child.position
+                val = childVal
+            if val <= alpha:  # Pruning
+                return val, None
             beta = min(beta, val)
-        return val
+        return val, position
 
     def constructTree(self, currentBoard, player, nodePosition, maxDepth=10, currentDepth=0):
+        logDebug("Current Depth = {}".format(currentDepth))
         node = Node(player=player)
         successors = []
         neighbors = GomukuMinmaxTree.findNeighbor(currentBoard)
+
         node.position = nodePosition
         for neighbor in neighbors:
             newboard = copy.deepcopy(currentBoard)
             position = (neighbor[0], neighbor[1])
             newboard[neighbor[0]][neighbor[1]] = player
-            if self.scorer.evaluate(newboard) > 5000 or currentDepth >= maxDepth:
+
+            if currentDepth >= maxDepth:
                 successors.append(Node(player=3 - player, isLeaf=True,
-                                       value=self.scorer.evaluate(newboard), position=position))
+                                       value=random.random(), position=position))
             else:
                 successors.append(self.constructTree(newboard, player=3 - player, nodePosition=position,
                                                                  maxDepth=maxDepth, currentDepth=currentDepth + 1))

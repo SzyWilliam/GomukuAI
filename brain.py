@@ -99,7 +99,7 @@ def brain_turn():
         minmaxTree = GomukuMinmaxTree(
             initialBoard=board,
             player=1,
-            scorer=PatternExtractionScorer(),
+            scorer=Conv2DScorer(),
             nodePosition=None,
             maxDepth=2,
             currentDepth=0

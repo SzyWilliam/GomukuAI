@@ -7,11 +7,10 @@ class Scorer:
     The responsibility of a Scorer:
     it takes a board and returns a value for that value
     """
-    @staticmethod
-    def evaluate(board):
+    def evaluate(self, board):
         raise NotImplementedError("interface method should not be invoked")
 
-
+# TODO Currently pattern
 class PatternExtractionScorer(Scorer):
     @staticmethod
     def evaluate(board):
@@ -46,6 +45,9 @@ class PatternExtractionScorer(Scorer):
                        '011010': [0, 0],
                        '010110': [0, 0],
                        '0220': [0, 0],
+                       '0110': [0, 0],  # Add three new patterns for a quick start
+                       '020': [0, 0],
+                       '010': [0, 0],
                        'double3': [0, 0]}
 
         # Extend the board by filling in the walls with 0;
@@ -119,8 +121,169 @@ class PatternExtractionScorer(Scorer):
                      '011010': 4,
                      '010110': 4,
                      '0220': 2,
+                     '0110': 2,
+                     '020': 1,
+                     '010': 1,
                      'double3': 20}
         patternDict = PatternExtractionScorer.patternCount(board)
         for pattern in patternDict.keys():
             score += (patternDict[pattern][0] - patternDict[pattern][1]) * scoreDict[pattern]
         return score
+
+
+class Conv2DScorer(Scorer):
+    def __init__(self):
+        self.convPatterns = []
+        self.convPatterns.append((np.array([
+            [1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1],
+        ]), (10000, 5)))
+
+        self.convPatterns.append((np.array([
+            [1, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0],
+        ]), (10000, 5)))
+
+        self.convPatterns.append((np.array([
+            [0, 0, 0, 0, 1],
+            [0, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0],
+            [0, 1, 0, 0, 0],
+            [1, 0, 0, 0, 0],
+        ]), (10000, 5)))
+
+        self.convPatterns.append((np.array([
+            [1, 1, 1, 1, 1],
+        ]), (10000, 5)))
+
+        self.convPatterns.append((np.array([
+            [1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1],
+        ]), (1000, 4)))
+        self.convPatterns.append((np.array([
+            [0, 0, 0, 1],
+            [0, 0, 1, 0],
+            [0, 1, 0, 0],
+            [1, 0, 0, 0],
+        ]), (1000, 4)))
+        self.convPatterns.append((np.array([
+            [1, 1, 1, 1],
+        ]), (1000, 4)))
+        self.convPatterns.append((np.array([
+            [1, 0, 0, 0],
+            [1, 0, 0, 0],
+            [1, 0, 0, 0],
+            [1, 0, 0, 0],
+        ]), (1000, 4)))
+
+        self.convPatterns.append((np.array([
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 1],
+        ]), (500, 3)))
+        self.convPatterns.append((np.array([
+            [0, 0, 1],
+            [0, 1, 0],
+            [1, 0, 0],
+        ]), (500, 3)))
+        self.convPatterns.append((np.array([
+            [1, 0, 0],
+            [1, 0, 0],
+            [1, 0, 0],
+        ]), (500, 3)))
+        self.convPatterns.append((np.array([
+            [1, 1, 1],
+        ]), (500, 3)))
+
+        self.convPatterns.append((np.array([
+            [1, 0],
+            [0, 1],
+        ]), (50, 2)))
+
+        self.convPatterns.append((np.array([
+            [0, 1],
+            [1, 0],
+        ]), (50, 2)))
+
+        self.convPatterns.append((np.array([
+            [1, 0],
+            [1, 0],
+        ]), (50, 2)))
+
+        self.convPatterns.append((np.array([
+            [1, 1],
+        ]), (50, 2)))
+
+    def evaluate(self, rawBoard):
+        board = np.array(rawBoard)
+        board[board == 2] = -1
+
+        extentBoard = np.array(rawBoard)
+        extentBoard = 3 - extentBoard
+        extentBoard[extentBoard == 3] = 0
+        extentBoard[extentBoard == 2] = -1
+
+        value = 0
+        for (k, v) in self.convPatterns:
+            pattern = k
+            patternValue, patternActivateNum = v
+            value += Conv2DScorer.featureCount(board, pattern, patternActivateNum) * patternValue
+            value -= Conv2DScorer.featureCount(extentBoard, pattern, patternActivateNum) * patternValue
+        return value
+
+    @staticmethod
+    def featureCount(board, pattern, activateNum):
+        out = Conv2DScorer.conv2D(board, pattern)
+        out[out != activateNum] = 0
+        return np.sum(out) / activateNum
+
+    @staticmethod
+    def conv2D(board, pattern):
+        w, h = board.shape
+        w1, h1 = pattern.shape
+        board = np.pad(board, max(h1, w1), 'constant')
+
+        out = np.zeros_like(board)
+
+        for i in range(w):
+            for j in range(h):
+                convSum = 0
+                for i1 in range(w1):
+                    for j1 in range(h1):
+                        convSum += board[i+i1][j+j1] * pattern[i1][j1]
+                out[i][j] = convSum
+        return out
+    
+        
+
+
+if __name__ == '__main__':
+    board = np.array(
+        [
+            [0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0],
+        ]
+    )
+
+    pattern = np.array([
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1],
+    ])
+
+    scorer = Conv2DScorer()
+    print(scorer.evaluate(board))
