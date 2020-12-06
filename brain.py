@@ -11,7 +11,7 @@ pp.infotext = 'name="pbrain-minmax", version="1.0"'
 MAX_BOARD = 20
 board = [[0 for i in range(MAX_BOARD)] for j in range(MAX_BOARD)]
 
-DEBUG_LOGFILE = "D:\Gomuku AI\FinalPJ\GomukuAI\dist\log.txt"
+DEBUG_LOGFILE = "E:/FOR COURSES/大三/人工智能/PJ/pj final/piskvork/log.txt"
 
 # ...and clear it initially
 with open(DEBUG_LOGFILE, "w") as f:

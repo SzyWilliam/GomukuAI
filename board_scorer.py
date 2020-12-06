@@ -59,47 +59,34 @@ class PatternExtractionScorer(Scorer):
         boardExtend1 = [[0 for i in range(width + 1)] for j in range(height + 1)]
         boardExtend2 = [[0 for i in range(width + 1)] for j in range(height + 1)]
         for i, j in product(range(len(board)), range(len(board))):
-            if board[i][j] != 1:
+            if board[i][j] == 1: # 改正了符号
                 boardExtend1[i][j] = board[i][j]
                 boardExtend2[i][j] = 3 - board[i][j]
 
-        # # Count by row
-        # for row in boardExtend1:
-        #     line = ''.join(map(str, row))
-        #     for pattern in patternDict.keys():
-        #         patternDict[pattern][0] += line.count(pattern)
-        # for row in boardExtend2:
-        #     line = ''.join(map(str, row))
-        #     for pattern in patternDict.keys():
-        #         patternDict[pattern][1] += line.count(pattern)
-        #
-        # # Count by column
-        # for col in list(array(boardExtend1).T):
-        #     line = ''.join(map(str, col))
-        #     for pattern in patternDict.keys():
-        #         patternDict[pattern][0] += line.count(pattern)
-        # for col in list(array(boardExtend2).T):
-        #     line = ''.join(map(str, col))
-        #     for pattern in patternDict.keys():
-        #         patternDict[pattern][1] += line.count(pattern)
 
-        # Count by diagonal
-        for i in range(len(boardExtend1)):
-            line = ''
-            for j in range(1 - i):
-                line = line + str(boardExtend1[i][j])
-            for pattern in patternDict.keys():
-                patternDict[pattern][0] += line.count(pattern)
-        for i in range(len(boardExtend2)):
-            line = ''
-            for j in range(1 - i):
-                line = line + str(boardExtend2[i][j])
-            for pattern in patternDict.keys():
-                patternDict[pattern][1] += line.count(pattern)
+        # Count by row/column/diagonal-up/diagonal-down
+        for i in range(width):
+            row1 = boardExtend1[i]
+            row2 = boardExtend2[i]
+            col1 = [row[i] for row in boardExtend1]
+            col2 = [row[i] for row in boardExtend2]
+            diaup1 = [boardExtend1[x][i-x] for x in range(i)]
+            diaup2 = [boardExtend2[x][i-x] for x in range(i)]
+            diadn1 = [boardExtend1[x][x+width-i] for x in range(i+1)]
+            diadn2 = [boardExtend2[x][x+width-i] for x in range(i+1)]
+            
+            row1 =  ''.join(map(str, row1))
+            row2 =  ''.join(map(str, row2))
+            col1 =  ''.join(map(str, col1))
+            col2 =  ''.join(map(str, col2))
+            diaup1 =  ''.join(map(str, diaup1))
+            diaup2 =  ''.join(map(str, diaup2))
+            diadn1 =  ''.join(map(str, diadn1))
+            diadn2 =  ''.join(map(str, diadn2))
 
-        # Count double3
-        # TODO double 3
-        # 待补
+            for pattern in patternDict.keys():
+                patternDict[pattern][0] += row1.count(pattern) + col1.count(pattern) + diaup1.count(pattern) + diadn1.count(pattern)
+                patternDict[pattern][1] += row2.count(pattern) + col2.count(pattern) + diaup2.count(pattern) + diadn2.count(pattern)
 
         return patternDict
 
@@ -265,21 +252,12 @@ class PatternExtractionScorer(Scorer):
 
 
 if __name__ == '__main__':
-    board = np.array(
-        [
-            [0, 0, 1, 0, 0, 0, 0],
+    board = [[0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 1, 0, 0, 0],
             [0, 0, 0, 0, 1, 0, 0],
             [0, 0, 0, 0, 0, 1, 0],
             [0, 0, 0, 0, 0, 0, 0],
             [0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0],
-        ]
-    )
+            [0, 0, 1, 0, 0, 0, 0]]
 
-    pattern = np.array([
-        [1, 0, 0, 0],
-        [0, 1, 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1],
-    ])
+
