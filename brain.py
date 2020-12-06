@@ -1,13 +1,8 @@
 '''
 Basic Functions
 '''
-
-import random
 import pisqpipe as pp
 from pisqpipe import DEBUG_EVAL, DEBUG
-from itertools import product
-import numpy as np
-import copy
 from minimax import *
 from board_scorer import *
 
@@ -99,7 +94,7 @@ def brain_turn():
         minmaxTree = GomukuMinmaxTree(
             initialBoard=board,
             player=1,
-            scorer=Conv2DScorer(),
+            scorer=PatternExtractionScorer(),
             nodePosition=None,
             maxDepth=2,
             currentDepth=0

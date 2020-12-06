@@ -1,7 +1,6 @@
 from itertools import product
 import copy
 from board_scorer import Scorer
-import random
 from brain import logDebug
 
 
@@ -109,7 +108,7 @@ class GomukuMinmaxTree:
 
             if currentDepth >= maxDepth:
                 successors.append(Node(player=3 - player, isLeaf=True,
-                                       value=random.random(), position=position))
+                                       value=self.scorer.evaluate(newboard), position=position))
             else:
                 successors.append(self.constructTree(newboard, player=3 - player, nodePosition=position,
                                                                  maxDepth=maxDepth, currentDepth=currentDepth + 1))
