@@ -1,4 +1,4 @@
-from numpy import array
+# from numpy import array
 from itertools import product
 # from scipy.signal import convolve2d
 # import scipy
@@ -63,25 +63,25 @@ class PatternExtractionScorer(Scorer):
                 boardExtend1[i][j] = board[i][j]
                 boardExtend2[i][j] = 3 - board[i][j]
 
-        # Count by row
-        for row in boardExtend1:
-            line = ''.join(map(str, row))
-            for pattern in patternDict.keys():
-                patternDict[pattern][0] += line.count(pattern)
-        for row in boardExtend2:
-            line = ''.join(map(str, row))
-            for pattern in patternDict.keys():
-                patternDict[pattern][1] += line.count(pattern)
-
-        # Count by column
-        for col in list(array(boardExtend1).T):
-            line = ''.join(map(str, col))
-            for pattern in patternDict.keys():
-                patternDict[pattern][0] += line.count(pattern)
-        for col in list(array(boardExtend2).T):
-            line = ''.join(map(str, col))
-            for pattern in patternDict.keys():
-                patternDict[pattern][1] += line.count(pattern)
+        # # Count by row
+        # for row in boardExtend1:
+        #     line = ''.join(map(str, row))
+        #     for pattern in patternDict.keys():
+        #         patternDict[pattern][0] += line.count(pattern)
+        # for row in boardExtend2:
+        #     line = ''.join(map(str, row))
+        #     for pattern in patternDict.keys():
+        #         patternDict[pattern][1] += line.count(pattern)
+        #
+        # # Count by column
+        # for col in list(array(boardExtend1).T):
+        #     line = ''.join(map(str, col))
+        #     for pattern in patternDict.keys():
+        #         patternDict[pattern][0] += line.count(pattern)
+        # for col in list(array(boardExtend2).T):
+        #     line = ''.join(map(str, col))
+        #     for pattern in patternDict.keys():
+        #         patternDict[pattern][1] += line.count(pattern)
 
         # Count by diagonal
         for i in range(len(boardExtend1)):
