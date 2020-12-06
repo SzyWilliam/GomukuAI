@@ -56,7 +56,7 @@ class PatternExtractionScorer(Scorer):
         boardExtend1 = [[0 for i in range(width + 1)] for j in range(height + 1)]
         boardExtend2 = [[0 for i in range(width + 1)] for j in range(height + 1)]
         for i, j in product(range(len(board)), range(len(board))):
-            if board[i][j] == 1: # 改正了符号
+            if board[i][j] != 0: # 改正了符号
                 boardExtend1[i][j] = board[i][j]
                 boardExtend2[i][j] = 3 - board[i][j]
 
