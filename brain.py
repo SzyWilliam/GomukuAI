@@ -88,6 +88,10 @@ def brain_turn():
     if pp.terminateAI:
         return
 
+    # Openning: play at the middle
+    if sum(board) == 0:
+        pp.do_mymove(int(len(board)/2), int(len(board)/2))
+
     # logDebug("Calling brain turn")
     minmaxTree = GomukuMinmaxTree(
         initialBoard=board,
