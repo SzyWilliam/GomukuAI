@@ -57,7 +57,6 @@ class PatternExtractionScorer(Scorer):
             THREEa: 3 stones in a line with both ends open  					 ***
             THREEb: 3 stones in a line with only 1 end open 					`***
             THREEc: 3 stones cut apart by one open cell with both ends open      * **
-            THREE2: 2 * 3 stones across with both ends open                      shuangsan
             TWOa: 2 stones in a line with both ends open 						 **
         :returns a dict: {patternstr:(player1_count,player2_count)}
         """
@@ -76,20 +75,23 @@ class PatternExtractionScorer(Scorer):
                        '0110': [0, 0], 
                        '010': [0, 0]}
 
-        # Extend the board by filling in the walls with 0;
+        # Extend the board by filling in the walls with 2;
         # Construct 2 extended boards for two players (save time for string match)
         width = len(board)
         height = len(board[0])
-        boardExtend1 = [[0 for i in range(width + 1)] for j in range(height + 1)]
-        boardExtend2 = [[0 for i in range(width + 1)] for j in range(height + 1)]
-        for i, j in product(range(len(board)), range(len(board))):
-            if board[i][j] != 0: # 改正了符号
-                boardExtend1[i][j] = board[i][j]
-                boardExtend2[i][j] = 3 - board[i][j]
+        boardExtend1 = [[0 for i in range(width + 2)] for j in range(height + 2)]
+        boardExtend2 = [[0 for i in range(width + 2)] for j in range(height + 2)]
+        for i, j in product(range(height), range(width)):
+            if board[i][j] != 0: 
+                boardExtend1[i+1][j+1] = board[i][j]
+                boardExtend2[i+1][j+1] = 3 - board[i][j]
 
+        for i in range(width + 2):
+            boardExtend1[0][i],boardExtend1[width+1][i],boardExtend1[i][0],boardExtend1[i][width+1] = 2,2,2,2
+            boardExtend2[0][i],boardExtend2[width+1][i],boardExtend2[i][0],boardExtend2[i][width+1] = 2,2,2,2
 
         # Count by row/column/diagonal-up/diagonal-down
-        for i in range(width):
+        for i in range(width+2):
             row1 = boardExtend1[i]
             row2 = boardExtend2[i]
             col1 = [row[i] for row in boardExtend1]
