@@ -2,6 +2,7 @@
 from itertools import product
 # from scipy.signal import convolve2d
 # import scipy
+from brain import logDebug
 
 class Scorer:
     """
@@ -39,7 +40,7 @@ class PatternExtractionScorer(Scorer):
 
     @staticmethod
     def evaluate(board, x, y, move):
-        return PatternExtractionScorer.score(board) + PatternExtractionScorer.compositeScore(board, x, y, move)
+        return PatternExtractionScorer.score(board) #+ PatternExtractionScorer.compositeScore(board, x, y, move)
 
     @staticmethod
     def heuristic(board, x, y, move):

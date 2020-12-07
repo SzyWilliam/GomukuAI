@@ -96,7 +96,7 @@ def brain_turn():
             player=1,
             scorer=PatternExtractionScorer(),
             nodePosition=None,
-            maxDepth=1,
+            maxDepth=0,
             currentDepth=0
         )
         _, nextPosition = minmaxTree.solveMinmaxWithABPruning()

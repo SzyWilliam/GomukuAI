@@ -1,7 +1,7 @@
 from itertools import product
 import copy
 from board_scorer import Scorer
-#from brain import logDebug
+from brain import logDebug
 
 
 class Node:
@@ -106,9 +106,12 @@ class GomukuMinmaxTree:
         # Current Strategy: Heuristic
         neighbors = sorted(
             neighbors,
-            key=(lambda n: self.scorer.heuristic(currentBoard, n[0], n[1], player)),
+            key=(lambda n: self.scorer.evaluate(currentBoard, n[0], n[1], player)),
             reverse=True
         )
+        logDebug("Depth {} with neighbors {}".format(currentDepth, len(neighbors)))
+        for n in neighbors:
+            logDebug("[{},{}] with score {}".format(n[0], n[1], self.scorer.evaluate(currentBoard, n[0], n[1], player)))
 
         EXPLORAION_BRANCH = 100
         if len(neighbors) > EXPLORAION_BRANCH:
