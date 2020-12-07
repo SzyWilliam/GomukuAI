@@ -91,18 +91,18 @@ def brain_turn():
     # Openning: play at the middle
     if sum(map(sum,board)) == 0:
         pp.do_mymove(int(len(board)/2), int(len(board)/2))
-
-    # logDebug("Calling brain turn")
-    minmaxTree = GomukuMinmaxTree(
-        initialBoard=board,
-        player=1,
-        scorer=PatternExtractionScorer(),
-        nodePosition=None,
-        maxDepth=1,
-        currentDepth=0
-    )
-    _, nextPosition = minmaxTree.solveMinmaxWithABPruning()
-    pp.do_mymove(nextPosition[0], nextPosition[1])
+    else:
+        # logDebug("Calling brain turn")
+        minmaxTree = GomukuMinmaxTree(
+            initialBoard=board,
+            player=1,
+            scorer=PatternExtractionScorer(),
+            nodePosition=None,
+            maxDepth=1,
+            currentDepth=0
+        )
+        _, nextPosition = minmaxTree.solveMinmaxWithABPruning()
+        pp.do_mymove(nextPosition[0], nextPosition[1])
  
 
 
