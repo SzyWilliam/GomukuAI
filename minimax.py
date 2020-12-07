@@ -131,9 +131,9 @@ class GomukuMinmaxTree:
         return node
 
     @staticmethod
-    def findNeighbor(board, neighborNearBy=3):
+    def findNeighbor(board, neighborNearBy=1):
         """
-        Find all open positions less than 3 cells away
+        Find all open positions 1 cell away
         TODO Enable more general neighbor discovering strategy
         :param board:
         :param neighborNearBy: how much distance

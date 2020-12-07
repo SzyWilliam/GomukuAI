@@ -25,13 +25,13 @@ board = [[0 for i in range(MAX_BOARD)] for j in range(MAX_BOARD)]
 #         f.flush()
 
 
-# define a function to get exception traceback
-def logTraceBack():
-    import traceback
-    with open(DEBUG_LOGFILE, "a") as f:
-        traceback.print_exc(file=f)
-        f.flush()
-    raise
+# # define a function to get exception traceback
+# def logTraceBack():
+#     import traceback
+#     with open(DEBUG_LOGFILE, "a") as f:
+#         traceback.print_exc(file=f)
+#         f.flush()
+#     raise
 
 
 def brain_init():
@@ -89,7 +89,7 @@ def brain_turn():
         return
 
     # Openning: play at the middle
-    if sum(board) == 0:
+    if sum(map(sum,board)) == 0:
         pp.do_mymove(int(len(board)/2), int(len(board)/2))
 
     # logDebug("Calling brain turn")
