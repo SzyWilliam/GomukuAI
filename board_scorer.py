@@ -96,23 +96,26 @@ class PatternExtractionScorer(Scorer):
         score = 0
         scoreDict = {'11111': 5000,
                      '011110': 5000,
-                     '011112': 100,
-                     '211110': 100,
-                     '0111010': 300,
-                     '0101110': 300,
-                     '0110110': 300,
-                     '01110': 300,
-                     '01112': 50,
-                     '21110': 50,
+                     '011112': 1000,
+                     '211110': 1000,
+                     '0111010': 600,
+                     '0101110': 600,
+                     '0110110': 600,
+                     '01110': 800,
+                     '01112': 300,
+                     '21110': 300,
                      '011010': 100,
                      '010110': 100,
-                     '0110': 10,
-                     '010': 1}
+                     '0110': 50,
+                     '010': 5}
         patternDict = PatternExtractionScorer.patternCount(board)
         for pattern in patternDict.keys():
             score += (patternDict[pattern][0] - 5*patternDict[pattern][1]) * scoreDict[pattern]
         return score
 
+    @staticmethod
+    def compositePattern(board):
+        pass
 
 # class Conv2DScorer(Scorer):
 #     def __init__(self):
@@ -245,13 +248,13 @@ class PatternExtractionScorer(Scorer):
         
 
 
-if __name__ == '__main__':
-    board = [[0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0],
-            [0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0]]
+# if __name__ == '__main__':
+#     board = [[0, 0, 0, 0, 0, 0, 0],
+#             [0, 0, 0, 1, 0, 0, 0],
+#             [0, 0, 0, 0, 1, 0, 0],
+#             [0, 0, 0, 0, 0, 1, 0],
+#             [0, 0, 0, 0, 0, 0, 0],
+#             [0, 0, 1, 0, 0, 0, 0],
+#             [0, 0, 1, 0, 0, 0, 0]]
 
 

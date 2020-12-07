@@ -1,7 +1,7 @@
 from itertools import product
 import copy
 from board_scorer import Scorer
-from brain import logDebug
+#from brain import logDebug
 
 
 class Node:
@@ -95,20 +95,28 @@ class GomukuMinmaxTree:
         return val, position
 
     def constructTree(self, currentBoard, player, nodePosition, maxDepth=10, currentDepth=0):
-        logDebug("Current Depth = {}".format(currentDepth))
         node = Node(player=player)
         successors = []
         neighbors = GomukuMinmaxTree.findNeighbor(currentBoard)
+
+        # logDebug("Current Depth {} and expand branch {}".format(currentDepth, len(neighbors)))
+
+        # By evaluation
+        # minmax with 3 depth, expand 25 nodes in each exploration will result in 10 s
+        # Current Strategy: take the first 25 branches
+        EXPLORAION_BRANCH = 40
+        if len(neighbors) > EXPLORAION_BRANCH:
+            neighbors = neighbors[0: EXPLORAION_BRANCH]
 
         node.position = nodePosition
         for neighbor in neighbors:
             newboard = copy.deepcopy(currentBoard)
             position = (neighbor[0], neighbor[1])
             newboard[neighbor[0]][neighbor[1]] = player
-
-            if currentDepth >= maxDepth:
+            value = self.scorer.evaluate(newboard)
+            if currentDepth >= maxDepth or value > 1000:
                 successors.append(Node(player=3 - player, isLeaf=True,
-                                       value=self.scorer.evaluate(newboard), position=position))
+                                       value=value, position=position))
             else:
                 successors.append(self.constructTree(newboard, player=3 - player, nodePosition=position,
                                                                  maxDepth=maxDepth, currentDepth=currentDepth + 1))
