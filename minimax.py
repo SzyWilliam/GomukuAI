@@ -42,6 +42,11 @@ class GomukuMinmaxTree:
         self.scorer = scorer
         self.board = initialBoard
         self.player = player
+
+        self.firstMove = False
+        if GomukuMinmaxTree.getStones(initialBoard, player) == GomukuMinmaxTree.getStones(initialBoard, 3-player):
+            self.firstMove = True
+        self.scorer.isFirstMove = self.firstMove
         self.root = self.constructTree(
             initialBoard,
             player,
@@ -120,7 +125,7 @@ class GomukuMinmaxTree:
         # for n in neighbors:
         #     logDebug("[{},{}] with score {}".format(n[0], n[1], self.scorer.evaluate(currentBoard, n[0], n[1], player)))
 
-        EXPLORAION_BRANCH = 50
+        EXPLORAION_BRANCH = 100
         # if len(neighbors) > EXPLORAION_BRANCH:
         #     neighbors = neighbors[0: EXPLORAION_BRANCH]
         node.position = nodePosition
@@ -134,13 +139,13 @@ class GomukuMinmaxTree:
             container.value = self.scorer.evaluate(container.newboard, n[0], n[1], player)
             expand_nodes.append(container)
 
-        if len(expand_nodes) > EXPLORAION_BRANCH:
-            expand_nodes = sorted(
-                expand_nodes,
-                key=(lambda container: container.value),
-                reverse=True
-            )
-            expand_nodes = expand_nodes[0:EXPLORAION_BRANCH]
+        # if len(expand_nodes) > EXPLORAION_BRANCH:
+        #     expand_nodes = sorted(
+        #         expand_nodes,
+        #         key=(lambda container: container.value),
+        #         reverse=True
+        #     )
+        #     expand_nodes = expand_nodes[0:EXPLORAION_BRANCH]
 
         for expand_node in expand_nodes:
             if currentDepth >= maxDepth or expand_node.value > 3000:

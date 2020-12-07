@@ -26,7 +26,7 @@ class PatternExtractionScorer(Scorer):
         50,   # live 2
         400,  # live 3
         4500, # live 4
-        5000  # live 5
+        10000  # live 5
     ]
     dead = [
         0,    # dead 0
@@ -35,8 +35,9 @@ class PatternExtractionScorer(Scorer):
         150,  # dead 3
         700   # dead 4
     ]
+    isFirstMove = False
 
-    compositeReward = 2
+    compositeReward = 1.5
 
     @staticmethod
     def evaluate(board, x, y, move):
@@ -145,10 +146,16 @@ class PatternExtractionScorer(Scorer):
                      '0112': PatternExtractionScorer.dead[2],
                      '010':  PatternExtractionScorer.live[1]}
         patternDict = PatternExtractionScorer.patternCount(board)
+
+        discount = 0
+        if PatternExtractionScorer.isFirstMove:
+            discount = 1.1
+        else:
+            discount = 0.9
         for pattern in patternDict.keys():
             if sum(patternDict[pattern]) > 0:
                 logDebug("Pattern: {}, my: {}, enemy:{}".format(pattern, patternDict[pattern][0], patternDict[pattern][1]))
-            score += (patternDict[pattern][0] - 1.2 * patternDict[pattern][1]) * scoreDict[pattern]
+            score += (patternDict[pattern][0] - 1.1 * patternDict[pattern][1]) * scoreDict[pattern]
         return score
 
     @staticmethod
