@@ -2,7 +2,7 @@
 from itertools import product
 # from scipy.signal import convolve2d
 # import scipy
-from brain import logDebug
+#from brain import logDebug
 
 class Scorer:
     """
@@ -153,8 +153,8 @@ class PatternExtractionScorer(Scorer):
         else:
             discount = 0.9
         for pattern in patternDict.keys():
-            if sum(patternDict[pattern]) > 0:
-                logDebug("Pattern: {}, my: {}, enemy:{}".format(pattern, patternDict[pattern][0], patternDict[pattern][1]))
+            #if sum(patternDict[pattern]) > 0:
+                #logDebug("Pattern: {}, my: {}, enemy:{}".format(pattern, patternDict[pattern][0], patternDict[pattern][1]))
             score += (patternDict[pattern][0] - 1.1 * patternDict[pattern][1]) * scoreDict[pattern]
         return score
 

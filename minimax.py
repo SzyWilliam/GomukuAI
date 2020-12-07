@@ -1,7 +1,7 @@
 from itertools import product
 import copy
 from board_scorer import Scorer
-from brain import logDebug
+#from brain import logDebug
 
 class Container:
     name = "container"
@@ -62,8 +62,8 @@ class GomukuMinmaxTree:
             second element is the position of the best move
         """
         value, pos = self.value(self.root, -float('inf'), float('inf'))
-        logDebug("[Take] [{},{}] with value = {}".format(pos[0], pos[1], value))
-        logDebug('[Evaluate Score] = {}'.format(self.scorer.evaluate(self.board, pos[0], pos[1], self.player)))
+        #logDebug("[Take] [{},{}] with value = {}".format(pos[0], pos[1], value))
+        #logDebug('[Evaluate Score] = {}'.format(self.scorer.evaluate(self.board, pos[0], pos[1], self.player)))
         return self.value(self.root, -float('inf'), float('inf'))
 
     # TODO Is The value really propagating up to parent nodes?
