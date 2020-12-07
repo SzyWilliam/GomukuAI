@@ -3,6 +3,8 @@ import copy
 from board_scorer import Scorer
 from brain import logDebug
 
+class Container:
+    name = "container"
 
 class Node:
     """
@@ -38,6 +40,8 @@ class GomukuMinmaxTree:
         :param currentDepth:
         """
         self.scorer = scorer
+        self.board = initialBoard
+        self.player = player
         self.root = self.constructTree(
             initialBoard,
             player,
@@ -52,6 +56,9 @@ class GomukuMinmaxTree:
         :return: a tuple, first element is the max value calculated for current board
             second element is the position of the best move
         """
+        value, pos = self.value(self.root, -float('inf'), float('inf'))
+        logDebug("[Take] [{},{}] with value = {}".format(pos[0], pos[1], value))
+        logDebug('[Evaluate Score] = {}'.format(self.scorer.evaluate(self.board, pos[0], pos[1], self.player)))
         return self.value(self.root, -float('inf'), float('inf'))
 
     # TODO Is The value really propagating up to parent nodes?
@@ -104,39 +111,68 @@ class GomukuMinmaxTree:
         # By evaluation
         # minmax with 3 depth, expand 25 nodes in each exploration will result in 10 s
         # Current Strategy: Heuristic
-        neighbors = sorted(
-            neighbors,
-            key=(lambda n: self.scorer.evaluate(currentBoard, n[0], n[1], player)),
-            reverse=True
-        )
-        logDebug("Depth {} with neighbors {}".format(currentDepth, len(neighbors)))
-        for n in neighbors:
-            logDebug("[{},{}] with score {}".format(n[0], n[1], self.scorer.evaluate(currentBoard, n[0], n[1], player)))
+        # neighbors = sorted(
+        #     neighbors,
+        #     key=(lambda n: self.scorer.evaluate(currentBoard, n[0], n[1], player)),
+        #     reverse=True
+        # )
 
-        EXPLORAION_BRANCH = 100
-        if len(neighbors) > EXPLORAION_BRANCH:
-            neighbors = neighbors[0: EXPLORAION_BRANCH]
+        # for n in neighbors:
+        #     logDebug("[{},{}] with score {}".format(n[0], n[1], self.scorer.evaluate(currentBoard, n[0], n[1], player)))
 
+        EXPLORAION_BRANCH = 50
+        # if len(neighbors) > EXPLORAION_BRANCH:
+        #     neighbors = neighbors[0: EXPLORAION_BRANCH]
         node.position = nodePosition
-        for neighbor in neighbors:
-            newboard = copy.deepcopy(currentBoard)
-            position = (neighbor[0], neighbor[1])
-            newboard[neighbor[0]][neighbor[1]] = player
-            value = self.scorer.evaluate(newboard, neighbor[0], neighbor[1], player)
-            if currentDepth >= maxDepth or value > 3000:
-                successors.append(Node(player=3 - player, isLeaf=True,
-                                       value=value, position=position))
-                if value > 3000: break
+
+        expand_nodes = []
+        for n in neighbors:
+            container = Container()
+            container.newboard = copy.deepcopy(currentBoard)
+            container.newboard[n[0]][n[1]] = player
+            container.position = (n[0], n[1])
+            container.value = self.scorer.evaluate(container.newboard, n[0], n[1], player)
+            expand_nodes.append(container)
+
+        if len(expand_nodes) > EXPLORAION_BRANCH:
+            expand_nodes = sorted(
+                expand_nodes,
+                key=(lambda container: container.value),
+                reverse=True
+            )
+            expand_nodes = expand_nodes[0:EXPLORAION_BRANCH]
+
+        for expand_node in expand_nodes:
+            if currentDepth >= maxDepth or expand_node.value > 3000:
+                successors.append(Node(player=3-player, isLeaf=True, value=expand_node.value, position=expand_node.position))
+                if expand_node.value > 3000: break
             else:
-                successors.append(self.constructTree(newboard, player=3 - player, nodePosition=position,
-                                                                 maxDepth=maxDepth, currentDepth=currentDepth + 1))
+                successors.append(self.constructTree(
+                    expand_node.newboard, player=3-player, nodePosition=expand_node.position,
+                    maxDepth=maxDepth, currentDepth=currentDepth+1
+                ))
+
+        # for neighbor in neighbors:
+        #     newboard = copy.deepcopy(currentBoard)
+        #     position = (neighbor[0], neighbor[1])
+        #     newboard[neighbor[0]][neighbor[1]] = player
+        #     value = self.scorer.evaluate(newboard, neighbor[0], neighbor[1], player)
+        #     if currentDepth != 0:
+        #         logDebug("After Take [{}, {}], [{},{}] with score {}".format(nodePosition[0], nodePosition[1], neighbor[0], neighbor[1], value))
+        #     if currentDepth >= maxDepth or value > 3000:
+        #         successors.append(Node(player=3 - player, isLeaf=True,
+        #                                value=value, position=position))
+        #         if value > 3000: break
+        #     else:
+        #         successors.append(self.constructTree(newboard, player=3 - player, nodePosition=position,
+        #                                                          maxDepth=maxDepth, currentDepth=currentDepth + 1))
         node.successor = successors
         return node
 
     @staticmethod
-    def findNeighbor(board, neighborNearBy=3):
+    def findNeighbor(board, neighborNearBy=1):
         """
-        Find all open positions less than 3 cells away
+        Find all open positions 1 cell away
         TODO Enable more general neighbor discovering strategy
         :param board:
         :param neighborNearBy: how much distance

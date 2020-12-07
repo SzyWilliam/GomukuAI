@@ -25,7 +25,7 @@ class PatternExtractionScorer(Scorer):
         5,    # live 1
         50,   # live 2
         400,  # live 3
-        5000, # live 4
+        4500, # live 4
         5000  # live 5
     ]
     dead = [
@@ -40,7 +40,7 @@ class PatternExtractionScorer(Scorer):
 
     @staticmethod
     def evaluate(board, x, y, move):
-        return PatternExtractionScorer.score(board) #+ PatternExtractionScorer.compositeScore(board, x, y, move)
+        return PatternExtractionScorer.score(board) + PatternExtractionScorer.compositeScore(board, x, y, move)
 
     @staticmethod
     def heuristic(board, x, y, move):
@@ -58,7 +58,6 @@ class PatternExtractionScorer(Scorer):
             THREEa: 3 stones in a line with both ends open  					 ***
             THREEb: 3 stones in a line with only 1 end open 					`***
             THREEc: 3 stones cut apart by one open cell with both ends open      * **
-            THREE2: 2 * 3 stones across with both ends open                      shuangsan
             TWOa: 2 stones in a line with both ends open 						 **
         :returns a dict: {patternstr:(player1_count,player2_count)}
         """
@@ -74,23 +73,28 @@ class PatternExtractionScorer(Scorer):
                        '21110': [0, 0],
                        '011010': [0, 0],
                        '010110': [0, 0],
-                       '0110': [0, 0], 
-                       '010': [0, 0]}
+                       '0110': [0, 0],
+                       '2110': [0, 0],
+                       '0112': [0, 0]
+                        }
 
-        # Extend the board by filling in the walls with 0;
+        # Extend the board by filling in the walls with 2;
         # Construct 2 extended boards for two players (save time for string match)
         width = len(board)
         height = len(board[0])
-        boardExtend1 = [[0 for i in range(width + 1)] for j in range(height + 1)]
-        boardExtend2 = [[0 for i in range(width + 1)] for j in range(height + 1)]
-        for i, j in product(range(len(board)), range(len(board))):
-            if board[i][j] != 0: # 改正了符号
-                boardExtend1[i][j] = board[i][j]
-                boardExtend2[i][j] = 3 - board[i][j]
+        boardExtend1 = [[0 for i in range(width + 2)] for j in range(height + 2)]
+        boardExtend2 = [[0 for i in range(width + 2)] for j in range(height + 2)]
+        for i, j in product(range(height), range(width)):
+            if board[i][j] != 0: 
+                boardExtend1[i+1][j+1] = board[i][j]
+                boardExtend2[i+1][j+1] = 3 - board[i][j]
 
+        for i in range(width + 2):
+            boardExtend1[0][i],boardExtend1[width+1][i],boardExtend1[i][0],boardExtend1[i][width+1] = 2,2,2,2
+            boardExtend2[0][i],boardExtend2[width+1][i],boardExtend2[i][0],boardExtend2[i][width+1] = 2,2,2,2
 
         # Count by row/column/diagonal-up/diagonal-down
-        for i in range(width):
+        for i in range(width+2):
             row1 = boardExtend1[i]
             row2 = boardExtend2[i]
             col1 = [row[i] for row in boardExtend1]
@@ -113,6 +117,8 @@ class PatternExtractionScorer(Scorer):
                 patternDict[pattern][0] += row1.count(pattern) + col1.count(pattern) + diaup1.count(pattern) + diadn1.count(pattern)
                 patternDict[pattern][1] += row2.count(pattern) + col2.count(pattern) + diaup2.count(pattern) + diadn2.count(pattern)
 
+        # patternDict['010'][0] /= 3
+        # patternDict['010'][1] /= 3
         return patternDict
 
     @staticmethod
@@ -140,7 +146,9 @@ class PatternExtractionScorer(Scorer):
                      '010':  PatternExtractionScorer.live[1]}
         patternDict = PatternExtractionScorer.patternCount(board)
         for pattern in patternDict.keys():
-            score += (patternDict[pattern][0] - 2 * patternDict[pattern][1]) * scoreDict[pattern]
+            if sum(patternDict[pattern]) > 0:
+                logDebug("Pattern: {}, my: {}, enemy:{}".format(pattern, patternDict[pattern][0], patternDict[pattern][1]))
+            score += (patternDict[pattern][0] - 1.2 * patternDict[pattern][1]) * scoreDict[pattern]
         return score
 
     @staticmethod
