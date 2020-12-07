@@ -110,7 +110,7 @@ class GomukuMinmaxTree:
             reverse=True
         )
 
-        EXPLORAION_BRANCH = 25
+        EXPLORAION_BRANCH = 100
         if len(neighbors) > EXPLORAION_BRANCH:
             neighbors = neighbors[0: EXPLORAION_BRANCH]
 

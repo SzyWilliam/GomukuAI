@@ -139,7 +139,7 @@ class PatternExtractionScorer(Scorer):
                      '010':  PatternExtractionScorer.live[1]}
         patternDict = PatternExtractionScorer.patternCount(board)
         for pattern in patternDict.keys():
-            score += (patternDict[pattern][0] - patternDict[pattern][1]) * scoreDict[pattern]
+            score += (patternDict[pattern][0] - 2 * patternDict[pattern][1]) * scoreDict[pattern]
         return score
 
     @staticmethod
