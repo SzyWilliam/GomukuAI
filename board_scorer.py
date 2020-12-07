@@ -19,6 +19,24 @@ class Scorer:
 
 # TODO Currently pattern
 class PatternExtractionScorer(Scorer):
+    live = [
+        0,    # live 0
+        5,    # live 1
+        50,   # live 2
+        400,  # live 3
+        5000, # live 4
+        5000  # live 5
+    ]
+    dead = [
+        0,    # dead 0
+        1,    # dead 1
+        15,   # dead 2
+        150,  # dead 3
+        700   # dead 4
+    ]
+
+    compositeReward = 2
+
     @staticmethod
     def evaluate(board, x, y, move):
         return PatternExtractionScorer.score(board) + PatternExtractionScorer.compositeScore(board, x, y, move)
@@ -103,25 +121,25 @@ class PatternExtractionScorer(Scorer):
         :returns an integer
         """
         score = 0
-        scoreDict = {'11111': 5000,  # win
-                     '011110': 5000,  # win
-                     '011112': 700,  # dead 4
-                     '211110': 700,
-                     '0111010': 600,  # live 3 ++
-                     '0101110': 600,
-                     '0110110': 600,
-                     '01110': 400,   # live 3
-                     '01112': 150,   # dead 3
-                     '21110': 150,
-                     '011010': 80,  # live 2 ++
-                     '010110': 80,
-                     '0110': 50,    # live 2
-                     '2110': 15,   # dead 2
-                     '0112': 15,
-                     '010': 5}
+        scoreDict = {'11111': PatternExtractionScorer.live[5],  # win
+                     '011110': PatternExtractionScorer.live[4],  # win
+                     '011112': PatternExtractionScorer.dead[4],  # dead 4
+                     '211110': PatternExtractionScorer.dead[4],
+                     '0111010': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.dead[3]),  # live 3 ++
+                     '0101110': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.dead[3]),
+                     '0110110': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.dead[3]),
+                     '01110': PatternExtractionScorer.live[3],   # live 3
+                     '01112': PatternExtractionScorer.dead[3],   # dead 3
+                     '21110': PatternExtractionScorer.dead[3],
+                     '011010': (PatternExtractionScorer.live[2]/2 + PatternExtractionScorer.dead[2]),  # live 2 ++
+                     '010110': (PatternExtractionScorer.live[2]/2 + PatternExtractionScorer.dead[2]),
+                     '0110': PatternExtractionScorer.live[2],    # live 2
+                     '2110': PatternExtractionScorer.dead[2],   # dead 2
+                     '0112': PatternExtractionScorer.dead[2],
+                     '010':  PatternExtractionScorer.live[1]}
         patternDict = PatternExtractionScorer.patternCount(board)
         for pattern in patternDict.keys():
-            score += (patternDict[pattern][0] - 1.2*patternDict[pattern][1]) * scoreDict[pattern]
+            score += (patternDict[pattern][0] - patternDict[pattern][1]) * scoreDict[pattern]
         return score
 
     @staticmethod
@@ -208,15 +226,9 @@ class PatternExtractionScorer(Scorer):
         elif diag2_live_side == 1:
             dead[col_count] += 1
 
-        win = 5000
-        reward = 1.5
-        dead_4 = 700
-        dead_3 = 150
-        dead_2 = 15
-
-        live_4 = 5000
-        live_3 = 600
-        live_2 = 50
+        win = PatternExtractionScorer.live[5]
+        live_score = PatternExtractionScorer.live
+        dead_score = PatternExtractionScorer.dead
         if live[3] >= 2 or live[4] >= 1:     # double live 3 or live 4
             return win
         elif live[3] >= 1 and dead[4] >= 1:  # live 3 + dead 4
@@ -226,8 +238,11 @@ class PatternExtractionScorer(Scorer):
         elif dead[4] >= 2:                   # double dead 4
             return win
         elif sum(live[2:4]) + sum(dead[2:4]) >= 2:
-            return 1.5 * (live[2] * live_2 + live[3] * live_3 + live[4] * live_4 +
-                          dead[2] * dead_2 + dead[3] * dead_3 + dead[4] * dead_4)
+            ret = 0
+            for i in range(2, 5):
+                ret += live[i] * live_score[i]
+                ret += dead[i] * dead_score[i]
+            return PatternExtractionScorer.compositeReward * ret
         else:
             return 0
 
