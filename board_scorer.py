@@ -9,14 +9,23 @@ class Scorer:
     The responsibility of a Scorer:
     it takes a board and returns a value for that value
     """
-    def evaluate(self, board):
+    @staticmethod
+    def evaluate(board, x, y, move):
+        raise NotImplementedError("interface method should not be invoked")
+
+    @staticmethod
+    def heuristic(board, x, y, move):
         raise NotImplementedError("interface method should not be invoked")
 
 # TODO Currently pattern
 class PatternExtractionScorer(Scorer):
     @staticmethod
-    def evaluate(board):
-        return PatternExtractionScorer.score(board)
+    def evaluate(board, x, y, move):
+        return PatternExtractionScorer.score(board) + PatternExtractionScorer.compositeScore(board, x, y, move)
+
+    @staticmethod
+    def heuristic(board, x, y, move):
+        return PatternExtractionScorer.compositeScore(board, x, y, move)
 
     @staticmethod
     def patternCount(board):
@@ -94,28 +103,154 @@ class PatternExtractionScorer(Scorer):
         :returns an integer
         """
         score = 0
-        scoreDict = {'11111': 5000,
-                     '011110': 5000,
-                     '011112': 1000,
-                     '211110': 1000,
-                     '0111010': 600,
+        scoreDict = {'11111': 5000,  # win
+                     '011110': 5000,  # win
+                     '011112': 700,  # dead 4
+                     '211110': 700,
+                     '0111010': 600,  # live 3 ++
                      '0101110': 600,
                      '0110110': 600,
-                     '01110': 800,
-                     '01112': 300,
-                     '21110': 300,
-                     '011010': 100,
-                     '010110': 100,
-                     '0110': 50,
+                     '01110': 400,   # live 3
+                     '01112': 150,   # dead 3
+                     '21110': 150,
+                     '011010': 80,  # live 2 ++
+                     '010110': 80,
+                     '0110': 50,    # live 2
+                     '2110': 15,   # dead 2
+                     '0112': 15,
                      '010': 5}
         patternDict = PatternExtractionScorer.patternCount(board)
         for pattern in patternDict.keys():
-            score += (patternDict[pattern][0] - 5*patternDict[pattern][1]) * scoreDict[pattern]
+            score += (patternDict[pattern][0] - 1.2*patternDict[pattern][1]) * scoreDict[pattern]
         return score
 
     @staticmethod
-    def compositePattern(board):
-        pass
+    def compositeScore(board, x, y, move):
+        width = len(board)
+        height = len(board[0])
+        boardExtend2 = [[0 for i in range(width)] for j in range(height)]
+        for i, j in product(range(len(board)), range(len(board))):
+            if board[i][j] != 0:  # 改正了符号
+                boardExtend2[i][j] = 3 - board[i][j]
+
+        score = PatternExtractionScorer.compositePatternProposal(board, x, y, move) - \
+                PatternExtractionScorer.compositePatternProposal(boardExtend2, x, y, 3-move)
+
+        if move == 1:
+            return score
+        elif move == 2:
+            return -score
+
+
+    @staticmethod
+    def compositePatternProposal(board, x, y, move):
+        """
+        This method takes a move place, and returns the value gained if this move is take
+        :param board:
+        :param x:
+        :param y:
+        :param move:
+        :return:
+        """
+        width = len(board)
+        height = len(board[0])
+
+        live = [0] * 5
+        dead = [0] * 5
+
+        col_count = 1
+        row_count = 1
+        diag1_count = 1
+        diag2_count = 1
+
+        col_live_side = 2
+        row_live_side = 2
+        diag1_live_side = 2
+        diag2_live_side = 2
+
+        # col count
+        col_right, col_right_live = PatternExtractionScorer._helperPatternCount(board, x, y, +1, 0, move, width, height)
+        col_left, col_left_live = PatternExtractionScorer._helperPatternCount(board, x, y, -1, 0, move, height, width)
+        col_count = col_left + col_right
+        col_live_side = col_left_live + col_right_live
+        if col_live_side == 2:
+            live[col_count] += 1
+        elif col_live_side == 1:
+            dead[col_count] += 1
+
+        # row count
+        row_right, row_right_live = PatternExtractionScorer._helperPatternCount(board, x, y, 0, +1, move, width, height)
+        row_left, row_left_live = PatternExtractionScorer._helperPatternCount(board, x, y, 0, -1, move, width, height)
+        row_count = row_right + row_left
+        row_live_side = row_left_live + row_right_live
+        if row_live_side == 2:
+            live[col_count] += 1
+        elif row_live_side == 1:
+            dead[col_count] += 1
+
+        # diag1 count
+        diag1_left, diag1_left_live = PatternExtractionScorer._helperPatternCount(board, x, y, +1, +1, move, width, height)
+        diag1_right, diag1_right_live = PatternExtractionScorer._helperPatternCount(board, x, y, -1, -1, move, width, height)
+        diag1_count = diag1_left + diag1_right
+        diag1_live_side = diag1_left_live + diag1_right_live
+        if diag1_live_side == 2:
+            live[col_count] += 1
+        elif diag1_live_side == 1:
+            dead[col_count] += 1
+
+        # diag2 count
+        diag2_left, diag2_left_live = PatternExtractionScorer._helperPatternCount(board, x, y, +1, -1, move, width, height)
+        diag2_right, diag2_right_live = PatternExtractionScorer._helperPatternCount(board, x, y, -1, +1, move, width, height)
+        diag2_count = diag2_left + diag2_right
+        diag2_live_side = diag2_left_live + diag2_right_live
+        if diag2_live_side == 2:
+            live[col_count] += 1
+        elif diag2_live_side == 1:
+            dead[col_count] += 1
+
+        win = 5000
+        reward = 1.5
+        dead_4 = 700
+        dead_3 = 150
+        dead_2 = 15
+
+        live_4 = 5000
+        live_3 = 600
+        live_2 = 50
+        if live[3] >= 2 or live[4] >= 1:     # double live 3 or live 4
+            return win
+        elif live[3] >= 1 and dead[4] >= 1:  # live 3 + dead 4
+            return win
+        elif live[3] >= 1 and live[4] >= 1:  # live 3 + live 4
+            return win
+        elif dead[4] >= 2:                   # double dead 4
+            return win
+        elif sum(live[2:4]) + sum(dead[2:4]) >= 2:
+            return 1.5 * (live[2] * live_2 + live[3] * live_3 + live[4] * live_4 +
+                          dead[2] * dead_2 + dead[3] * dead_3 + dead[4] * dead_4)
+        else:
+            return 0
+
+
+    @staticmethod
+    def _helperPatternCount(board, x, y, x_incr, y_incr, move, width, height):
+        x_index = x_incr
+        y_index = y_incr
+        count = 0
+        live_side = 1
+        while 0 <= x + x_index < width and 0 <= y + y_index < height:
+            if board[x + x_index][y + y_index] == move:
+                count += 1
+            else:
+                if board[x + x_index][y + y_index] == 3 - move:
+                    live_side -= 1
+                break
+            x_index += x_incr
+            y_index += y_incr
+        return [count, live_side]
+
+
+
 
 # class Conv2DScorer(Scorer):
 #     def __init__(self):
@@ -248,13 +383,14 @@ class PatternExtractionScorer(Scorer):
         
 
 
-# if __name__ == '__main__':
-#     board = [[0, 0, 0, 0, 0, 0, 0],
-#             [0, 0, 0, 1, 0, 0, 0],
-#             [0, 0, 0, 0, 1, 0, 0],
-#             [0, 0, 0, 0, 0, 1, 0],
-#             [0, 0, 0, 0, 0, 0, 0],
-#             [0, 0, 1, 0, 0, 0, 0],
-#             [0, 0, 1, 0, 0, 0, 0]]
+if __name__ == '__main__':
+    board =[[2, 0, 0, 0, 1, 0, 0],
+            [0, 1, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 1, 1, 0, 1, 0],
+            [0, 0, 1, 0, 2, 0, 0],
+            [0, 0, 1, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1]]
 
+    PatternExtractionScorer.compositePatternProposal(board, 2, 2, 1)
 

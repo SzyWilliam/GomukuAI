@@ -27,7 +27,7 @@ class Node:
 
 
 class GomukuMinmaxTree:
-    def __init__(self, initialBoard, player, scorer: Scorer, nodePosition, maxDepth=10, currentDepth=0):
+    def __init__(self, initialBoard, player, scorer:Scorer, nodePosition, maxDepth=10, currentDepth=0):
         """
         Construct a minmax Tree for Gomuku problem
         :param initialBoard:
@@ -103,8 +103,14 @@ class GomukuMinmaxTree:
 
         # By evaluation
         # minmax with 3 depth, expand 25 nodes in each exploration will result in 10 s
-        # Current Strategy: take the first 25 branches
-        EXPLORAION_BRANCH = 40
+        # Current Strategy: Heuristic
+        neighbors = sorted(
+            neighbors,
+            key=(lambda n: self.scorer.heuristic(currentBoard, n[0], n[1], player)),
+            reverse=True
+        )
+
+        EXPLORAION_BRANCH = 25
         if len(neighbors) > EXPLORAION_BRANCH:
             neighbors = neighbors[0: EXPLORAION_BRANCH]
 
@@ -113,10 +119,11 @@ class GomukuMinmaxTree:
             newboard = copy.deepcopy(currentBoard)
             position = (neighbor[0], neighbor[1])
             newboard[neighbor[0]][neighbor[1]] = player
-            value = self.scorer.evaluate(newboard)
-            if currentDepth >= maxDepth or value > 1000:
+            value = self.scorer.evaluate(newboard, neighbor[0], neighbor[1], player)
+            if currentDepth >= maxDepth or value > 3000:
                 successors.append(Node(player=3 - player, isLeaf=True,
                                        value=value, position=position))
+                if value > 3000: break
             else:
                 successors.append(self.constructTree(newboard, player=3 - player, nodePosition=position,
                                                                  maxDepth=maxDepth, currentDepth=currentDepth + 1))
