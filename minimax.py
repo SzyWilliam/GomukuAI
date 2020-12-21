@@ -125,7 +125,7 @@ class GomukuMinmaxTree:
         # for n in neighbors:
         #     logDebug("[{},{}] with score {}".format(n[0], n[1], self.scorer.evaluate(currentBoard, n[0], n[1], player)))
 
-        EXPLORAION_BRANCH = 100
+        # EXPLORAION_BRANCH = 30
         # if len(neighbors) > EXPLORAION_BRANCH:
         #     neighbors = neighbors[0: EXPLORAION_BRANCH]
         node.position = nodePosition
