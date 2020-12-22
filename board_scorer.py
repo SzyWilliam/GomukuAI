@@ -133,7 +133,7 @@ class PatternExtractionScorer(Scorer):
                      '011110': PatternExtractionScorer.live[4],  # win
                      '011112': PatternExtractionScorer.dead[4],  # dead 4
                      '211110': PatternExtractionScorer.dead[4],
-                     '0111010': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),  # live 3 ++
+                     '0111012': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),  # live 3 ++
                      '0101110': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),
                      '0110110': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),
                      '01110': PatternExtractionScorer.live[3],   # live 3
