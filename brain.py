@@ -11,27 +11,27 @@ pp.infotext = 'name="pbrain-minmax", version="1.0"'
 MAX_BOARD = 20
 board = [[0 for i in range(MAX_BOARD)] for j in range(MAX_BOARD)]
 
-# DEBUG_LOGFILE = "D:/Gomuku AI/FinalPJ/GomukuAI/dist/log.txt"
+DEBUG_LOGFILE = "D:/Gomuku AI/FinalPJ/GomukuAI/dist/log.txt"
 
-# # ...and clear it initially
-# with open(DEBUG_LOGFILE, "w") as f:
-#     pass
-
-
-# # define a function for writing messages to the file
-# def logDebug(msg):
-#     with open(DEBUG_LOGFILE, "a") as f:
-#         f.write(msg + "\n")
-#         f.flush()
+# ...and clear it initially
+with open(DEBUG_LOGFILE, "w") as f:
+    pass
 
 
-# # define a function to get exception traceback
-# def logTraceBack():
-#     import traceback
-#     with open(DEBUG_LOGFILE, "a") as f:
-#         traceback.print_exc(file=f)
-#         f.flush()
-#     raise
+# define a function for writing messages to the file
+def logDebug(msg):
+    with open(DEBUG_LOGFILE, "a") as f:
+        f.write(msg + "\n")
+        f.flush()
+
+
+# define a function to get exception traceback
+def logTraceBack():
+    import traceback
+    with open(DEBUG_LOGFILE, "a") as f:
+        traceback.print_exc(file=f)
+        f.flush()
+    raise
 
 
 def brain_init():
@@ -101,7 +101,7 @@ def brain_turn():
             player=1,
             scorer=PatternExtractionScorer(),
             nodePosition=None,
-            maxDepth=1,
+            maxDepth=4,
             currentDepth=0
         )
         _, nextPosition = minmaxTree.solveMinmaxWithABPruning()

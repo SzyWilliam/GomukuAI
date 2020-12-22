@@ -1,7 +1,7 @@
 from itertools import product
 import copy
 from board_scorer import Scorer
-#from brain import logDebug
+from brain import logDebug
 
 class Container:
     name = "container"
@@ -111,20 +111,6 @@ class GomukuMinmaxTree:
         successors = []
         neighbors = GomukuMinmaxTree.findNeighbor(currentBoard)
 
-        # logDebug("Current Depth {} and expand branch {}".format(currentDepth, len(neighbors)))
-
-        # By evaluation
-        # minmax with 3 depth, expand 25 nodes in each exploration will result in 10 s
-        # Current Strategy: Heuristic
-        # neighbors = sorted(
-        #     neighbors,
-        #     key=(lambda n: self.scorer.evaluate(currentBoard, n[0], n[1], player)),
-        #     reverse=True
-        # )
-
-        # for n in neighbors:
-        #     logDebug("[{},{}] with score {}".format(n[0], n[1], self.scorer.evaluate(currentBoard, n[0], n[1], player)))
-
         # EXPLORAION_BRANCH = 30
         # if len(neighbors) > EXPLORAION_BRANCH:
         #     neighbors = neighbors[0: EXPLORAION_BRANCH]
@@ -139,13 +125,15 @@ class GomukuMinmaxTree:
             container.value = self.scorer.evaluate(container.newboard, n[0], n[1], player)
             expand_nodes.append(container)
 
-        # if len(expand_nodes) > EXPLORAION_BRANCH:
-        #     expand_nodes = sorted(
-        #         expand_nodes,
-        #         key=(lambda container: container.value),
-        #         reverse=True
-        #     )
-        #     expand_nodes = expand_nodes[0:EXPLORAION_BRANCH]
+        exploration_branch = 4
+        if len(expand_nodes) > exploration_branch:
+            expand_nodes = sorted(
+                expand_nodes,
+                key=lambda container: container.value,
+                reverse=True
+            )
+            logDebug("[Pruning] Performing Pruning of advanced strategy")
+        expand_nodes = expand_nodes[0:exploration_branch]
 
         for expand_node in expand_nodes:
             if currentDepth >= maxDepth or expand_node.value > 3000:

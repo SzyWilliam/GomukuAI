@@ -41,7 +41,7 @@ class PatternExtractionScorer(Scorer):
 
     @staticmethod
     def evaluate(board, x, y, move):
-        return PatternExtractionScorer.score(board) #+ PatternExtractionScorer.compositeScore(board, x, y, move)
+        return PatternExtractionScorer.score(board) + PatternExtractionScorer.compositeScore(board, x, y, move)
 
     @staticmethod
     def heuristic(board, x, y, move):
@@ -133,14 +133,14 @@ class PatternExtractionScorer(Scorer):
                      '011110': PatternExtractionScorer.live[4],  # win
                      '011112': PatternExtractionScorer.dead[4],  # dead 4
                      '211110': PatternExtractionScorer.dead[4],
-                     '0111010': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.dead[3]),  # live 3 ++
-                     '0101110': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.dead[3]),
-                     '0110110': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.dead[3]),
+                     '0111010': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),  # live 3 ++
+                     '0101110': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),
+                     '0110110': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),
                      '01110': PatternExtractionScorer.live[3],   # live 3
                      '01112': PatternExtractionScorer.dead[3],   # dead 3
                      '21110': PatternExtractionScorer.dead[3],
-                     '011010': (PatternExtractionScorer.live[2]/2 + PatternExtractionScorer.dead[2]),  # live 2 ++
-                     '010110': (PatternExtractionScorer.live[2]/2 + PatternExtractionScorer.dead[2]),
+                     '011010': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.live[2]),  # live 2 ++
+                     '010110': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.live[2]),
                      '0110': PatternExtractionScorer.live[2],    # live 2
                      '2110': PatternExtractionScorer.dead[2],   # dead 2
                      '0112': PatternExtractionScorer.dead[2],
