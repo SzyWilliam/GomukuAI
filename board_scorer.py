@@ -72,7 +72,7 @@ class PatternExtractionScorer(Scorer):
 
     @staticmethod
     def evaluate(board, x, y, move):
-        return PatternExtractionScorer.score(board) #+ PatternExtractionScorer.compositeScore(board, x, y, move)
+        return PatternExtractionScorer.score(board,move) + PatternExtractionScorer.compositeScore(board, x, y, move)
 
     @staticmethod
     def heuristic(board, x, y, move):
@@ -141,7 +141,7 @@ class PatternExtractionScorer(Scorer):
         return patternDict
 
     @staticmethod
-    def score(board):
+    def score(board,move):
         """
         Evaluate the score of player 1, according current board
         :returns an integer
@@ -159,7 +159,7 @@ class PatternExtractionScorer(Scorer):
         for pattern in patternDict.keys():
             #if sum(patternDict[pattern]) > 0:
                 #logDebug("Pattern: {}, my: {}, enemy:{}".format(pattern, patternDict[pattern][0], patternDict[pattern][1]))
-            score += (patternDict[pattern][0] - 1.1 * patternDict[pattern][1]) * scoreDict[pattern]
+            score += (patternDict[pattern][move - 1] - discount * patternDict[pattern][ 2 - move]) * scoreDict[pattern]
         return score
 
     @staticmethod
