@@ -2,7 +2,7 @@
 from itertools import product
 # from scipy.signal import convolve2d
 # import scipy
-#from brain import logDebug
+from brain import logDebug
 
 class Scorer:
     """
@@ -37,11 +37,42 @@ class PatternExtractionScorer(Scorer):
     ]
     isFirstMove = False
 
+    scoreDict = {'11111': live[5],  # win
+                 '011110': live[4], # win
+                 '011112': dead[4], # dead 4
+                 '211110': dead[4], # dead 4
+                 '01110': live[3],  # live 3
+                 '01112': dead[3],  # dead 3
+                 '21110': dead[3],  # dead 3
+                 '0110': live[2],   # live 2
+                 '2110': dead[2],   # dead 2
+                 '0112': dead[2],   # dead 2
+                 '010': live[1],    # live 1
+                 '0111010': (live[5] / 2 + live[3]),  # live 3 ++
+                 '0101110': (live[5] / 2 + live[3]),
+                 '0110110': (live[5] / 2 + live[3]),
+
+                 '2111010': (live[5] / 4 + dead[3]),  # dead 3++
+                 '0111012': (live[5] / 4 + live[3]),
+                 '2110110': (live[5] / 4 + live[2]),
+                 '0110112': (live[5] / 4 + live[2]),
+                 '2101110': (live[5] / 4 + live[3]),
+                 '0101112': (live[5] / 4 + dead[3]),
+
+                 '011010': (live[4] / 2 + live[2]),  # live 2 ++
+                 '010110': (live[4] / 2 + live[2]),
+
+                 '211010': (dead[4] / 2 + dead[2]),  # dead 2 ++
+                 '011012': (dead[4] / 2 + dead[2]),
+                 '210110': (dead[4] / 2 + dead[2]),
+                 '010112': (dead[4] / 2 + dead[2]),
+                 }
+
     compositeReward = 1.5
 
     @staticmethod
     def evaluate(board, x, y, move):
-        return PatternExtractionScorer.score(board) + PatternExtractionScorer.compositeScore(board, x, y, move)
+        return PatternExtractionScorer.score(board) #+ PatternExtractionScorer.compositeScore(board, x, y, move)
 
     @staticmethod
     def heuristic(board, x, y, move):
@@ -62,22 +93,9 @@ class PatternExtractionScorer(Scorer):
             TWOa: 2 stones in a line with both ends open 						 **
         :returns a dict: {patternstr:(player1_count,player2_count)}
         """
-        patternDict = {'11111': [0, 0],
-                       '011110': [0, 0],
-                       '011112': [0, 0],
-                       '211110': [0, 0],
-                       '0111010': [0, 0],
-                       '0101110': [0, 0],
-                       '0110110': [0, 0],
-                       '01110': [0, 0],
-                       '01112': [0, 0],
-                       '21110': [0, 0],
-                       '011010': [0, 0],
-                       '010110': [0, 0],
-                       '0110': [0, 0],
-                       '2110': [0, 0],
-                       '0112': [0, 0]
-                        }
+        patternDict = {}
+        for key in PatternExtractionScorer.scoreDict:
+            patternDict[key] = [0, 0]
 
         # Extend the board by filling in the walls with 2;
         # Construct 2 extended boards for two players (save time for string match)
@@ -129,22 +147,8 @@ class PatternExtractionScorer(Scorer):
         :returns an integer
         """
         score = 0
-        scoreDict = {'11111': PatternExtractionScorer.live[5],  # win
-                     '011110': PatternExtractionScorer.live[4],  # win
-                     '011112': PatternExtractionScorer.dead[4],  # dead 4
-                     '211110': PatternExtractionScorer.dead[4],
-                     '0111012': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),  # live 3 ++
-                     '0101110': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),
-                     '0110110': (PatternExtractionScorer.live[4]/2 + PatternExtractionScorer.live[3]),
-                     '01110': PatternExtractionScorer.live[3],   # live 3
-                     '01112': PatternExtractionScorer.dead[3],   # dead 3
-                     '21110': PatternExtractionScorer.dead[3],
-                     '011010': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.live[2]),  # live 2 ++
-                     '010110': (PatternExtractionScorer.live[3]/2 + PatternExtractionScorer.live[2]),
-                     '0110': PatternExtractionScorer.live[2],    # live 2
-                     '2110': PatternExtractionScorer.dead[2],   # dead 2
-                     '0112': PatternExtractionScorer.dead[2],
-                     '010':  PatternExtractionScorer.live[1]}
+        logDebug("This method is called")
+        scoreDict = PatternExtractionScorer.scoreDict
         patternDict = PatternExtractionScorer.patternCount(board)
 
         discount = 0
