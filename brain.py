@@ -90,23 +90,25 @@ def brain_turn():
     if pp.terminateAI:
         return
 
-    # Openning: play at the middle
-    if sum(map(sum, board)) == 0:
-        pp.do_mymove(int(len(board)/2), int(len(board)/2))
-    else:
-        # logDebug("Calling brain turn")
+    try:
+        # Openning: play at the middle
+        if sum(map(sum, board)) == 0:
+            pp.do_mymove(int(len(board)/2), int(len(board)/2))
+        else:
+            # logDebug("Calling brain turn")
 
-        minmaxTree = GomukuMinmaxTree(
-            initialBoard=board,
-            player=1,
-            scorer=PatternExtractionScorer(),
-            nodePosition=None,
-            maxDepth=4,
-            currentDepth=0
-        )
-        _, nextPosition = minmaxTree.solveMinmaxWithABPruning()
-        pp.do_mymove(nextPosition[0], nextPosition[1])
-
+            minmaxTree = GomukuMinmaxTree(
+                initialBoard=board,
+                player=1,
+                scorer=FastScorer(),
+                nodePosition=None,
+                maxDepth=0,
+                currentDepth=0
+            )
+            _, nextPosition = minmaxTree.solveMinmaxWithABPruning()
+            pp.do_mymove(nextPosition[0], nextPosition[1])
+    except:
+        logTraceBack()
 
 
 def brain_end():

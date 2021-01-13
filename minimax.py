@@ -107,6 +107,7 @@ class GomukuMinmaxTree:
         return val, position
 
     def constructTree(self, currentBoard, player, nodePosition, maxDepth=10, currentDepth=0):
+        logDebug("Construct Tree with depth = {}".format(currentDepth))
         node = Node(player=player)
         successors = []
         neighbors = GomukuMinmaxTree.findNeighbor(currentBoard)
@@ -125,40 +126,24 @@ class GomukuMinmaxTree:
             container.value = self.scorer.evaluate(container.newboard, n[0], n[1], player)
             expand_nodes.append(container)
 
-        exploration_branch = 4
+        exploration_branch = 50
         if len(expand_nodes) > exploration_branch:
             expand_nodes = sorted(
                 expand_nodes,
                 key=lambda container: container.value,
                 reverse=True
             )
-            logDebug("[Pruning] Performing Pruning of advanced strategy")
         expand_nodes = expand_nodes[0:exploration_branch]
 
         for expand_node in expand_nodes:
-            if currentDepth >= maxDepth or expand_node.value > 3000:
+            if currentDepth >= maxDepth or expand_node.value > 5000:
                 successors.append(Node(player=3-player, isLeaf=True, value=expand_node.value, position=expand_node.position))
-                if expand_node.value > 3000: break
             else:
                 successors.append(self.constructTree(
                     expand_node.newboard, player=3-player, nodePosition=expand_node.position,
                     maxDepth=maxDepth, currentDepth=currentDepth+1
                 ))
 
-        # for neighbor in neighbors:
-        #     newboard = copy.deepcopy(currentBoard)
-        #     position = (neighbor[0], neighbor[1])
-        #     newboard[neighbor[0]][neighbor[1]] = player
-        #     value = self.scorer.evaluate(newboard, neighbor[0], neighbor[1], player)
-        #     if currentDepth != 0:
-        #         logDebug("After Take [{}, {}], [{},{}] with score {}".format(nodePosition[0], nodePosition[1], neighbor[0], neighbor[1], value))
-        #     if currentDepth >= maxDepth or value > 3000:
-        #         successors.append(Node(player=3 - player, isLeaf=True,
-        #                                value=value, position=position))
-        #         if value > 3000: break
-        #     else:
-        #         successors.append(self.constructTree(newboard, player=3 - player, nodePosition=position,
-        #                                                          maxDepth=maxDepth, currentDepth=currentDepth + 1))
         node.successor = successors
         return node
 
