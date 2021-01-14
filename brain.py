@@ -11,7 +11,7 @@ pp.infotext = 'name="pbrain-minmax", version="1.0"'
 MAX_BOARD = 20
 board = [[0 for i in range(MAX_BOARD)] for j in range(MAX_BOARD)]
 
-DEBUG_LOGFILE = "D:/Gomuku AI/FinalPJ/GomukuAI/dist/log.txt"
+DEBUG_LOGFILE = "E:/FOR COURSES/大三/人工智能/PJ/pj final/pbrain-minmax/GomukuAI/log.txt"
 
 # ...and clear it initially
 with open(DEBUG_LOGFILE, "w") as f:
@@ -90,25 +90,23 @@ def brain_turn():
     if pp.terminateAI:
         return
 
-    try:
-        # Openning: play at the middle
-        if sum(map(sum, board)) == 0:
-            pp.do_mymove(int(len(board)/2), int(len(board)/2))
-        else:
-            # logDebug("Calling brain turn")
+    # Openning: play at the middle
+    if sum(map(sum, board)) == 0:
+        pp.do_mymove(int(len(board)/2), int(len(board)/2))
+    else:
+        # logDebug("Calling brain turn")
 
-            minmaxTree = GomukuMinmaxTree(
-                initialBoard=board,
-                player=1,
-                scorer=FastScorer(),
-                nodePosition=None,
-                maxDepth=0,
-                currentDepth=0
-            )
-            _, nextPosition = minmaxTree.solveMinmaxWithABPruning()
-            pp.do_mymove(nextPosition[0], nextPosition[1])
-    except:
-        logTraceBack()
+        minmaxTree = GomukuMinmaxTree(
+            initialBoard=board,
+            player=1,
+            scorer=PatternExtractionScorer(),
+            nodePosition=None,
+            maxDepth=4,
+            currentDepth=0
+        )
+        _, nextPosition = minmaxTree.solveMinmaxWithABPruning()
+        pp.do_mymove(nextPosition[0], nextPosition[1])
+
 
 
 def brain_end():

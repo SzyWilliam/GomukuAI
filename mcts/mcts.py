@@ -21,7 +21,7 @@ class MCTSScorer(Scorer):
     Scorer that is based on the MCTS method
     """
     @staticmethod
-    def evaluate(board, x, y, move,trial=1,explore=4):
+    def evaluate(board, x, y, move,trial=5,explore=1):
         """
         This function takes a board, evaluates the score (on behave of player 1)
         and returns the evaluated score
