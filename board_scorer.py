@@ -3,7 +3,7 @@ from itertools import product
 # from scipy.signal import convolve2d
 # import scipy
 from copy import deepcopy
-from brain import logDebug
+#from brain import logDebug
 
 class Scorer:
     """
@@ -49,24 +49,25 @@ class PatternExtractionScorer(Scorer):
                  '2110': dead[2],   # dead 2
                  '0112': dead[2],   # dead 2
                  '010': live[1],    # live 1
-                 '0111010': (live[5] / 3 + live[3]),  # live 3 ++
-                 '0101110': (live[5] / 3 + live[3]),
-                 '0110110': (live[5] / 3 + live[3]),
+                 
+                #  '0111010': (live[3]),  # live 3 ++
+                #  '0101110': (live[3]),
+                #  '0110110': (live[3]),
 
-                 '2111010': (live[5] / 4 + dead[3]),  # dead 3++
-                 '0111012': (live[5] / 4 + live[3]),
-                 '2110110': (live[5] / 4 + live[2]),
-                 '0110112': (live[5] / 4 + live[2]),
-                 '2101110': (live[5] / 4 + live[3]),
-                 '0101112': (live[5] / 4 + dead[3]),
+                #  '2111010': (dead[3]),  # dead 3++
+                #  '0111012': (live[3]),
+                #  '2110110': (live[2]),
+                #  '0110112': (live[2]),
+                #  '2101110': (live[3]),
+                #  '0101112': (live[5] / 4 + dead[3]),
 
-                 '011010': (live[3] / 2 + live[2]),  # live 2 ++
-                 '010110': (live[3] / 2 + live[2]),
+                #  '011010': (live[3] / 2 + live[2]),  # live 2 ++
+                #  '010110': (live[3] / 2 + live[2]),
 
-                 '211010': (dead[4] / 2 + dead[2]),  # dead 2 ++
-                 '011012': (dead[4] / 2 + dead[2]),
-                 '210110': (dead[4] / 2 + dead[2]),
-                 '010112': (dead[4] / 2 + dead[2]),
+                #  '211010': (dead[4] / 2 + dead[2]),  # dead 2 ++
+                #  '011012': (dead[4] / 2 + dead[2]),
+                #  '210110': (dead[4] / 2 + dead[2]),
+                #  '010112': (dead[4] / 2 + dead[2]),
                  }
 
     compositeReward = 1.2
@@ -137,8 +138,6 @@ class PatternExtractionScorer(Scorer):
                 patternDict[pattern][0] += row1.count(pattern) + col1.count(pattern) + diaup1.count(pattern) + diadn1.count(pattern)
                 patternDict[pattern][1] += row2.count(pattern) + col2.count(pattern) + diaup2.count(pattern) + diadn2.count(pattern)
 
-        # patternDict['010'][0] /= 3
-        # patternDict['010'][1] /= 3
         return patternDict
 
     @staticmethod
@@ -151,19 +150,21 @@ class PatternExtractionScorer(Scorer):
         scoreDict = PatternExtractionScorer.scoreDict
         patternDict = PatternExtractionScorer.patternCount(board)
 
-        discount = 1.2
+        discount = 1.1
         for pattern in patternDict.keys():
             score += (patternDict[pattern][move-1] - discount * patternDict[pattern][2-move]) * scoreDict[pattern]
         return score
 
     @staticmethod
     def compositeScore(board, x, y, move):
-        enemy_board = deepcopy(board)
-        enemy_board[x][y] = 3-move
+        #enemy_board = deepcopy(board)
+        #enemy_board[x][y] = 3-move
         my_live, my_dead = PatternExtractionScorer.compositePatternProposal(board, x, y, move)
-        enemy_live, enemy_dead = PatternExtractionScorer.compositePatternProposal(enemy_board, x, y, 3-move)
-        live = [my_live[i] + enemy_live[i] for i in range(len(my_live))]
-        dead = [my_dead[i] + enemy_dead[i] for i in range(len(my_dead))]
+        live = [my_live[i] for i in range(len(my_live))]
+        dead = [my_dead[i] for i in range(len(my_dead))]
+        #enemy_live, enemy_dead = PatternExtractionScorer.compositePatternProposal(enemy_board, x, y, 3-move)
+        #live = [my_live[i] + enemy_live[i] for i in range(len(my_live))]
+        #dead = [my_dead[i] + enemy_dead[i] for i in range(len(my_dead))]
 
         score = 0
         win = PatternExtractionScorer.live[5]
@@ -205,8 +206,8 @@ class PatternExtractionScorer(Scorer):
         width = len(board)
         height = len(board[0])
 
-        live = [0] * 5
-        dead = [0] * 5
+        live = [0] * 6
+        dead = [0] * 6
 
         col_count = 1
         row_count = 1
@@ -319,7 +320,7 @@ class FastScorer(Scorer):
         This method should calculate the localized effects of the [x, y] move by player $move
         """
         score = FastScorer.score(board, x, y, move)
-        logDebug("This method is called for [{},{}] and score is {}".format(x, y, score))
+        #logDebug("This method is called for [{},{}] and score is {}".format(x, y, score))
         return score
 
     @staticmethod
@@ -418,19 +419,19 @@ class FastScorer(Scorer):
         pattern_count = [live, sleep]
 
         [col, col_live] = FastScorer.directionCount(board, x, y, player, 1, 0, len(board), len(board[0]))
-        logDebug("col pattern [{},{}] is {} with state {}".format(x, y, col, col_live))
+        #("col pattern [{},{}] is {} with state {}".format(x, y, col, col_live))
         if col_live != 0: pattern_count[2 - col_live][min(col, 5)] += 1
 
         [row, row_live] = FastScorer.directionCount(board, x, y, player, 0, 1, len(board), len(board[0]))
-        logDebug("row pattern [{},{}] is {} with state {}".format(x, y, row, row_live))
+        #logDebug("row pattern [{},{}] is {} with state {}".format(x, y, row, row_live))
         if row_live != 0: pattern_count[2 - row_live][min(row, 5)] += 1
 
         [diag1, diag1_live] = FastScorer.directionCount(board, x, y, player, 1, 1, len(board), len(board[0]))
-        logDebug("diag1 pattern [{},{}] is {} with state {}".format(x, y, diag1, diag1_live))
+        #logDebug("diag1 pattern [{},{}] is {} with state {}".format(x, y, diag1, diag1_live))
         if diag1_live != 0: pattern_count[2 - diag1_live][min(diag1, 5)] += 1
 
         [diag2, diag2_live] = FastScorer.directionCount(board, x, y, player, 1, -1, len(board), len(board[0]))
-        logDebug("diag2 pattern [{},{}] is {} with state {}".format(x, y, diag2, diag2_live))
+        #logDebug("diag2 pattern [{},{}] is {} with state {}".format(x, y, diag2, diag2_live))
         if diag2_live != 0: pattern_count[2 - diag2_live][min(diag2, 5)] += 1
 
         return pattern_count

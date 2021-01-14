@@ -1,7 +1,6 @@
 from itertools import product
 import copy
 from board_scorer import Scorer
-from brain import logDebug
 
 class Container:
     name = "container"
@@ -107,7 +106,6 @@ class GomukuMinmaxTree:
         return val, position
 
     def constructTree(self, currentBoard, player, nodePosition, maxDepth=10, currentDepth=0):
-        logDebug("Construct Tree with depth = {}".format(currentDepth))
         node = Node(player=player)
         successors = []
         neighbors = GomukuMinmaxTree.findNeighbor(currentBoard)
@@ -126,7 +124,7 @@ class GomukuMinmaxTree:
             container.value = self.scorer.evaluate(container.newboard, n[0], n[1], player)
             expand_nodes.append(container)
 
-        exploration_branch = 50
+        exploration_branch = 4
         if len(expand_nodes) > exploration_branch:
             expand_nodes = sorted(
                 expand_nodes,
